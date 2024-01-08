@@ -1,111 +1,53 @@
+import 'package:age_calculator/screens/calculator_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:date_format/date_format.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: CalculatorScreen(),
-    );
-  }
-}
+      ///title
+      title: 'Age Calculator',
 
-class CalculatorScreen extends StatefulWidget {
-  @override
-  _CalculatorScreenState createState() => _CalculatorScreenState();
-}
+      ///banner
+      debugShowCheckedModeBanner: false,
 
-class _CalculatorScreenState extends State<CalculatorScreen> {
-  TextEditingController dobController = TextEditingController();
-  DateTime currentDate = DateTime.now();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Age Calculator'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ListTile(
-              title: Text('Current Date'),
-              subtitle: Text(formatDate(currentDate, [yyyy, '-', mm, '-', dd])),
+      theme: ThemeData(
+        primaryColor: Colors.blue, // Change the primary color as needed
+        textTheme:
+            GoogleFonts.firaSansTextTheme(Theme.of(context).textTheme).copyWith(
+          // Customize your text theme here
+          titleLarge:
+              const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+          titleMedium: const TextStyle(fontSize: 16.0),
+          bodyMedium: const TextStyle(fontSize: 14.0),
+        ),
+        appBarTheme: AppBarTheme(
+          color: Colors.blue,
+          iconTheme: const IconThemeData(color: Colors.white),
+          toolbarTextStyle: TextTheme(
+            titleLarge: GoogleFonts.firaSans(
+              color: Colors.white, // Change app bar text color
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
             ),
-            TextFormField(
-              controller: dobController,
-              decoration: InputDecoration(labelText: 'Enter Date of Birth'),
-              keyboardType: TextInputType.datetime,
-              onTap: () => _selectDate(context),
+          ).bodyMedium,
+          titleTextStyle: TextTheme(
+            titleLarge: GoogleFonts.firaSans(
+              color: Colors.white, // Change app bar text color
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
             ),
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: () => _calculateAge(context),
-              child: Text('Calculate Age'),
-            ),
-          ],
+          ).titleLarge, // Change app bar icon color
         ),
       ),
-    );
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    DateTime picked = await showDatePicker(
-      context: context,
-      initialDate: currentDate,
-      firstDate: DateTime(1900),
-      lastDate: currentDate,
-    );
-
-    if (picked != null && picked != currentDate) {
-      setState(() {
-        currentDate = picked;
-      });
-    }
-  }
-
-  void _calculateAge(BuildContext context) {
-    DateTime dob = DateTime.parse(dobController.text);
-    Duration difference = currentDate.difference(dob);
-
-    int years = (difference.inDays / 365).floor();
-    int days = difference.inDays;
-    int months = (difference.inDays / 30).floor();
-    int minutes = difference.inMinutes;
-    int seconds = difference.inSeconds;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Age Calculation Result'),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Years: $years'),
-              Text('Months: $months'),
-              Text('Days: $days'),
-              Text('Minutes: $minutes'),
-              Text('Seconds: $seconds'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
+      home: const CalculatorScreen(),
     );
   }
 }
