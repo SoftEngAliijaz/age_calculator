@@ -1,102 +1,66 @@
-import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({Key? key}) : super(key: key);
 
   @override
-  _CalculatorScreenState createState() => _CalculatorScreenState();
+  State<CalculatorScreen> createState() => _CalculatorScreenState();
 }
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
-  TextEditingController dobController = TextEditingController();
-  DateTime currentDate = DateTime.now();
+  String myAge = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Age Calculator'),
+        title: const Text("Age Calculator"),
+        centerTitle: true,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Theme.of(context).primaryColor,
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ListTile(
-              title: const Text('Current Date'),
-              subtitle: Text(formatDate(currentDate, [dd, '-', mm, '-', yyyy])),
+            const Text(
+              'Your age is',
+              style: TextStyle(fontSize: 40),
             ),
-            TextFormField(
-              controller: dobController,
-              decoration:
-                  const InputDecoration(labelText: 'Enter Date of Birth'),
-              keyboardType: TextInputType.datetime,
-              onTap: () => _selectDate(context),
+            const SizedBox(
+              height: 10,
             ),
-            const SizedBox(height: 16.0),
+            Text(myAge),
+            const SizedBox(
+              height: 30,
+            ),
             ElevatedButton(
-              onPressed: () => _calculateAge(context),
-              child: const Text('Calculate Age'),
-            ),
+              onPressed: () => pickDob(context),
+              child: const Text('Pick Your Date of Birth'),
+            )
           ],
         ),
       ),
     );
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    DateTime? picked = await showDatePicker(
+  pickDob(BuildContext context) {
+    showDatePicker(
       context: context,
-      initialDate: currentDate,
+      initialDate: DateTime.now(),
       firstDate: DateTime(1900),
-      lastDate: currentDate,
-    );
-
-    if (picked != null && picked != currentDate) {
+      lastDate: DateTime.now(),
+    ).then((pickedDate) {
+      if (pickedDate == null) {
+        return;
+      }
       setState(() {
-        currentDate = picked;
+        final age = DateTime.now().difference(pickedDate);
+        myAge =
+            ' ${age.inDays ~/ 365} years, ${(age.inDays % 365) ~/ 30} months, ${(age.inDays % 365) % 30} days';
       });
-    }
-  }
-
-  void _calculateAge(BuildContext context) {
-    DateTime dob = DateTime.parse(dobController.text);
-    Duration difference = currentDate.difference(dob);
-
-    int years = (difference.inDays / 365).floor();
-    int days = difference.inDays;
-    int months = (difference.inDays / 30).floor();
-    int minutes = difference.inMinutes;
-    int seconds = difference.inSeconds;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Years: $years'),
-                Text('Months: $months'),
-                Text('Days: $days'),
-                Text('Minutes: $minutes'),
-                Text('Seconds: $seconds'),
-                SizedBox(height: 16.0),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    });
   }
 }
