@@ -1,57 +1,118 @@
-import 'package:age_calculator/constants/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:intl/intl.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({Key? key}) : super(key: key);
 
   @override
-  State<CalculatorScreen> createState() => _CalculatorScreenState();
+  _CalculatorScreenState createState() => _CalculatorScreenState();
 }
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
-  String myAge = '';
+  DateTime _selectedDate = DateTime.now();
+  DateTime _selectedBirthDate = DateTime.now();
+  String _age = '';
+  String _nextBirthday = '';
+
+  void _showDatePicker() {
+    DatePicker.showDatePicker(
+      context,
+      showTitleActions: true,
+      minTime: DateTime(1900, 1, 1),
+      maxTime: DateTime.now(),
+      onConfirm: (date) {
+        setState(() {
+          _selectedDate = date;
+          _calculateAge();
+        });
+      },
+      currentTime: _selectedDate,
+      locale: LocaleType.en,
+    );
+  }
+
+  void _showBirthDatePicker() {
+    DatePicker.showDatePicker(
+      context,
+      showTitleActions: true,
+      minTime: DateTime(1900, 1, 1),
+      maxTime: DateTime.now(),
+      onConfirm: (date) {
+        setState(() {
+          _selectedBirthDate = date;
+          _calculateAge();
+        });
+      },
+      currentTime: _selectedBirthDate,
+      locale: LocaleType.en,
+    );
+  }
+
+  void _calculateAge() {
+    final age = _selectedDate.difference(_selectedBirthDate).inDays;
+    final nextBirthday =
+        _selectedBirthDate.add(Duration(days: (age / 365).ceil() * 365));
+    final DateFormat() = DateFormat('yyyy-MM-dd');
+    setState(() {
+      _age =
+          'Years: ${(age / 365).floor()} Months: ${((age % 365) / 30).floor()} Days: ${(age % 365) % 30}';
+      _nextBirthday = 'Month: ${nextBirthday.month} Days: ${nextBirthday.day}';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title:
-            const Text("Age Calculator", style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-        systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: Theme.of(context).primaryColor,
-        ),
-        backgroundColor: Colors.blueGrey,
+        title: const Text('Caclculator App'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const ListTile(
-              title: Text('Your Age is',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: _showDatePicker,
+                  child: const Text('Date Of Today'),
+                ),
+                ElevatedButton(
+                  onPressed: _showBirthDatePicker,
+                  child: const Text('Date Of Birth'),
+                ),
+              ],
             ),
-            AppUtils.sizedBox,
-            Text(myAge.isEmpty ? 'Not Selected Yet!' : myAge,
-                style: const TextStyle(fontSize: 18)),
-            AppUtils.sizedBox,
-            ElevatedButton(
-              onPressed: () {
-                AppUtils.dateOfBirthPicker(context, (pickedDate) {
-                  setState(() {
-                    final age = DateTime.now().difference(pickedDate);
-                    myAge =
-                        ' ${age.inDays ~/ 365} years, ${(age.inDays % 365) ~/ 30} months, ${(age.inDays % 365) % 30} days';
-                  });
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.blueGrey,
-              ),
-              child: const Text('Pick Your Date of Birth'),
+            const SizedBox(height: 20),
+            const Text(
+              'Total Age',
+              style: TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              _age,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Next Birthday',
+              style: TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              _nextBirthday,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Total Life Of',
+              style: TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Years: 29 Months: 358 Days: 10914 Weeks: 1559 Hours: 261957',
+              style: TextStyle(fontSize: 16),
             ),
           ],
         ),
